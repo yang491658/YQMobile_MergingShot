@@ -146,8 +146,6 @@ public class UIManager : MonoBehaviour
         if (detailPlanets == null || detailPlanets.Count == 0)
             foreach (Transform child in GameObject.Find("DetailUI/Planets").transform)
                 detailPlanets.Add(new PlanetSlot(child.gameObject));
-
-
     }
 
     private static void LoadSprite(List<Sprite> _list, string _sprite)
