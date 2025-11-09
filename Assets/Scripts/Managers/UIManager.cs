@@ -471,10 +471,13 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region SET
-    public void SetInGameUI(float _margin)
+    public void SetMargin(float _margin)
     {
-        var rt = inGameUI.GetComponent<RectTransform>();
-        rt.offsetMax = new Vector3(rt.offsetMax.x, -_margin);
+        var ig = inGameUI.GetComponent<RectTransform>();
+        ig.offsetMax = new Vector3(ig.offsetMax.x, -_margin);
+
+        var de = detailUI.GetComponent<RectTransform>();
+        de.offsetMax = new Vector3(de.offsetMax.x, -_margin);
     }
     #endregion
 
