@@ -43,7 +43,7 @@ public class SoundManager : MonoBehaviour
         soundClips.sfxClips = sfxList.ToArray();
     }
 
-     private void LoadSound(List<AudioClip> _list, SoundType _type)
+    private void LoadSound(List<AudioClip> _list, SoundType _type)
     {
         _list.Clear();
         string path = "Sounds/" + (_type == SoundType.BGM ? "BGMs" : "SFXs");
