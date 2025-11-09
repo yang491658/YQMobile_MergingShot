@@ -1,14 +1,16 @@
-using GoogleMobileAds.Api;
+Ôªøusing GoogleMobileAds.Api;
 using System.Collections;
 using UnityEngine;
 
 public class ADManager : MonoBehaviour
 {
-    public static ADManager Instance { private set; get; }
+     public static ADManager Instance { private set; get; }
 
     [SerializeField][Min(0)] private float delay = 0.5f;
 
+    private Canvas rootCanvas;
     private BannerView banner;
+    private float bannerHeight = 0f;
 
     private InterstitialAd interAD;
     private System.Action OnCloseInterAD;
@@ -17,14 +19,6 @@ public class ADManager : MonoBehaviour
     private System.Action OnCloseReward;
 
 #if UNITY_EDITOR
-    private const string BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
-    private const string INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
-    private const string REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
-#elif UNITY_ANDROID
-    private const string BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
-    private const string INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
-    private const string REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
-#elif UNITY_IPHONE
     private const string BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
     private const string INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
     private const string REWARDED_ID = "ca-app-pub-3940256099942544/5224354917";
@@ -53,6 +47,8 @@ public class ADManager : MonoBehaviour
     private void Start()
     {
         MobileAds.Initialize(_ => { });
+
+        rootCanvas = FindFirstObjectByType<Canvas>();
 
         CreateBanner(true);
         LoadInterAD();
@@ -85,13 +81,11 @@ public class ADManager : MonoBehaviour
         reward = null;
     }
 
-    #region πË≥  ±§∞Ì
+    #region Î∞∞ÎÑà Í¥ëÍ≥†
     public void CreateBanner(bool _show)
     {
         if (_show)
         {
-            float margin = 0f;
-
             if (banner == null)
             {
                 var size = AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(AdSize.FullWidth);
@@ -99,42 +93,68 @@ public class ADManager : MonoBehaviour
                 banner.LoadAd(new AdRequest());
                 RegisterBanner();
 
-                var go = GameObject.Find("ADAPTIVE(Clone)");
-                if (go != null)
-                {
-                    go.name = "Banner";
-                    go.transform.SetParent(transform);
-
-                    var image = go.transform.Find("Image");
-                    if (image != null)
-                        margin = image.GetComponent<RectTransform>().rect.height;
-                }
+                UpdateBannerHeight();
             }
             else banner.Show();
-
-            UIManager.Instance?.SetInGameUI(margin);
         }
         else
         {
             banner?.Hide();
-            UIManager.Instance?.SetInGameUI(0f);
+            bannerHeight = 0f;
         }
+
+        UIManager.Instance?.SetInGameUI(bannerHeight);
     }
 
     private void RegisterBanner()
     {
         if (banner == null) return;
-        banner.OnBannerAdLoaded += () => { };
-        banner.OnBannerAdLoadFailed += _ => { };
+        banner.OnBannerAdLoaded += () =>
+        {
+            UpdateBannerHeight();
+            UIManager.Instance?.SetInGameUI(bannerHeight);
+        };
+        banner.OnBannerAdLoadFailed += _ =>
+        {
+            bannerHeight = 0f;
+            UIManager.Instance?.SetInGameUI(bannerHeight);
+        };
         banner.OnAdPaid += _ => { };
         banner.OnAdImpressionRecorded += () => { };
         banner.OnAdClicked += () => { };
         banner.OnAdFullScreenContentOpened += () => { };
         banner.OnAdFullScreenContentClosed += () => { };
     }
+
+    private void UpdateBannerHeight()
+    {
+#if UNITY_EDITOR
+        float h = 0f;
+        var go = GameObject.Find("ADAPTIVE(Clone)");
+        if (go == null) go = GameObject.Find("Banner");
+        if (go != null)
+        {
+            go.transform.SetParent(transform);
+            var image = go.transform.Find("Image");
+            if (image != null)
+            {
+                var rt = image.GetComponent<RectTransform>();
+                if (rt != null) h = rt.rect.height;
+            }
+        }
+        bannerHeight = h;
+#else
+        if (banner == null) { bannerHeight = 0f; return; }
+        if (rootCanvas == null) rootCanvas = FindFirstObjectByType<Canvas>();
+        float px = banner.GetHeightInPixels();
+        float scale = (rootCanvas != null) ? rootCanvas.scaleFactor : 1f;
+        bannerHeight = px / Mathf.Max(0.0001f, scale);
+#endif
+    }
+
     #endregion
 
-    #region ¿¸∏È ±§∞Ì
+    #region Ï†ÑÎ©¥ Í¥ëÍ≥†
     public void LoadInterAD()
     {
         interAD?.Destroy();
@@ -187,7 +207,7 @@ public class ADManager : MonoBehaviour
     }
     #endregion
 
-    #region ∏ÆøˆµÂ ±§∞Ì
+    #region Î¶¨ÏõåÎìú Í¥ëÍ≥†
     public void LoadReward()
     {
         reward?.Destroy();
@@ -220,7 +240,7 @@ public class ADManager : MonoBehaviour
 
     private void OnReward(Reward _reward)
     {
-        // TODO ∫∏ªÛ √≥∏Æ ∑Œ¡˜
+        // TODO Î≥¥ÏÉÅ Ï≤òÎ¶¨ Î°úÏßÅ
     }
 
     private void RegisterReward(RewardedAd _ad)

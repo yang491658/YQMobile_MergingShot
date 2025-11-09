@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,10 +20,10 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioSource sfxSource;
 
     [Header("Volume")]
-    [SerializeField][Range(0f, 1f)] private float bgmVolume = 1f;
-    [SerializeField][Range(0f, 1f)] private float sfxVolume = 1f;
-    private float prevBgmVolume;
-    private float prevSfxVolume;
+    [SerializeField][Range(0f, 1f)] private float bgmVol = 1f;
+    [SerializeField][Range(0f, 1f)] private float sfxVol = 1f;
+    private float prevBgmVol;
+    private float prevSfxVol;
     public event System.Action<SoundType, float> OnChangeVolume;
 
     [Header("Clip")]
@@ -43,7 +43,7 @@ public class SoundManager : MonoBehaviour
         soundClips.sfxClips = sfxList.ToArray();
     }
 
-    private static void LoadSound(List<AudioClip> _list, SoundType _type)
+     private void LoadSound(List<AudioClip> _list, SoundType _type)
     {
         _list.Clear();
         string path = "Sounds/" + (_type == SoundType.BGM ? "BGMs" : "SFXs");
@@ -69,10 +69,10 @@ public class SoundManager : MonoBehaviour
             btn.onClick.AddListener(Button);
     }
 
-    public void Pause(bool _on) => AudioListener.pause = _on;
-    public void Pause(string _on) => AudioListener.pause = bool.TryParse(_on, out var v) && v;
+    public void PauseSound(bool _on) => AudioListener.pause = _on;
+    public void PauseSound(string _on) => AudioListener.pause = bool.TryParse(_on, out var _v) && _v;
 
-    #region ¹è°æÀ½
+    #region ë°°ê²½ìŒ
     public void PlayBGM(AudioClip _clip)
     {
         if (bgmSource == null || IsBGMMuted()) return;
@@ -83,27 +83,30 @@ public class SoundManager : MonoBehaviour
 
     public void PlayBGM(string _name)
     {
-        if (bgmDict.TryGetValue(_name, out var clip))
-            PlayBGM(clip);
+        if (bgmDict.TryGetValue(_name, out var _clip))
+            PlayBGM(_clip);
+    }
+
+    public void PauseBGM(bool _on)
+    {
+        if (_on) bgmSource.Pause();
+        else bgmSource.UnPause();
     }
 
     public void StopBGM() => bgmSource.Stop();
 
     public void ToggleBGM()
     {
-        if (!IsBGMMuted() && bgmVolume > 0f)
+        if (!IsBGMMuted() && bgmVol > 0f)
         {
-            prevBgmVolume = bgmVolume;
+            prevBgmVol = bgmVol;
             SetBGMVolume(0f);
         }
-        else
-        {
-            SetBGMVolume(prevBgmVolume);
-        }
+        else SetBGMVolume(prevBgmVol);
     }
     #endregion
 
-    #region È¿°úÀ½
+    #region íš¨ê³¼ìŒ
     public void PlaySFX(AudioClip _clip)
     {
         if (sfxSource == null || IsSFXMuted()) return;
@@ -113,29 +116,21 @@ public class SoundManager : MonoBehaviour
 
     public void PlaySFX(string _name)
     {
-        if (sfxDict.TryGetValue(_name, out var clip))
-            PlaySFX(clip);
+        if (sfxDict.TryGetValue(_name, out var _clip))
+            PlaySFX(_clip);
     }
 
     public void ToggleSFX()
     {
-        if (!IsSFXMuted() && sfxVolume > 0f)
+        if (!IsSFXMuted() && sfxVol > 0f)
         {
-            prevSfxVolume = sfxVolume;
+            prevSfxVol = sfxVol;
             SetSFXVolume(0f);
         }
-        else
-        {
-            SetSFXVolume(prevSfxVolume);
-        }
+        else SetSFXVolume(prevSfxVol);
     }
 
     public void Button() => PlaySFX("Button");
-
-    public void Shoot() => PlaySFX("Shoot");
-    public void Merge(int _id = 0) => PlaySFX(_id != EntityManager.Instance.GetFinal() ? "Merge" : "Flame");
-    public void Count() => PlaySFX("Count");
-
     public void GameOver()
     {
         PlaySFX("GameOver");
@@ -153,31 +148,31 @@ public class SoundManager : MonoBehaviour
         sfxSource.playOnAwake = false;
         bgmSource.loop = true;
 
-        SetBGMVolume(bgmVolume);
-        SetSFXVolume(sfxVolume);
+        SetBGMVolume(bgmVol);
+        SetSFXVolume(sfxVol);
         SetDictionaries();
     }
 
     public void SetBGMVolume(float _volume = 1f)
     {
-        bgmVolume = Mathf.Clamp01(_volume);
-        bgmSource.volume = bgmVolume;
-        bgmSource.mute = (bgmVolume <= 0f);
+        bgmVol = Mathf.Clamp01(_volume);
+        bgmSource.volume = bgmVol;
+        bgmSource.mute = (bgmVol <= 0f);
 
-        if (bgmVolume > 0f) prevBgmVolume = bgmVolume;
+        if (bgmVol > 0f) prevBgmVol = bgmVol;
 
-        OnChangeVolume?.Invoke(SoundType.BGM, bgmVolume);
+        OnChangeVolume?.Invoke(SoundType.BGM, bgmVol);
     }
 
     public void SetSFXVolume(float _volume = 1f)
     {
-        sfxVolume = Mathf.Clamp01(_volume);
-        sfxSource.volume = sfxVolume;
-        sfxSource.mute = (sfxVolume <= 0f);
+        sfxVol = Mathf.Clamp01(_volume);
+        sfxSource.volume = sfxVol;
+        sfxSource.mute = (sfxVol <= 0f);
 
-        if (sfxVolume > 0f) prevSfxVolume = sfxVolume;
+        if (sfxVol > 0f) prevSfxVol = sfxVol;
 
-        OnChangeVolume?.Invoke(SoundType.SFX, sfxVolume);
+        OnChangeVolume?.Invoke(SoundType.SFX, sfxVol);
     }
 
     private void SetDictionaries()
@@ -195,10 +190,8 @@ public class SoundManager : MonoBehaviour
     #endregion
 
     #region GET
-    public float GetBGMVolume() => bgmVolume;
-    public float GetSFXVolume() => sfxVolume;
-    public float GetSFXLength(string _name) =>
-        sfxDict.TryGetValue(_name, out var _clip) && _clip != null ? _clip.length : 0f;
+    public float GetBGMVolume() => bgmVol;
+    public float GetSFXVolume() => sfxVol;
 
     public bool IsBGMMuted() => bgmSource != null && bgmSource.mute;
     public bool IsSFXMuted() => sfxSource != null && sfxSource.mute;

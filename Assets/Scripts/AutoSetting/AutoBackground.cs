@@ -1,11 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [ExecuteAlways]
 public class AutoBackground : MonoBehaviour
 {
     private Camera cam;
     private SpriteRenderer sr;
-
     private int lastW, lastH;
     private float lastAspect, lastOrthoSize;
 
@@ -25,6 +24,8 @@ public class AutoBackground : MonoBehaviour
 
     private void Update()
     {
+        if (cam == null) cam = Camera.main;
+
         if (Screen.width != lastW || Screen.height != lastH ||
             !Mathf.Approximately(cam.aspect, lastAspect) ||
             !Mathf.Approximately(cam.orthographicSize, lastOrthoSize))
@@ -49,8 +50,8 @@ public class AutoBackground : MonoBehaviour
         float ppu = sp.pixelsPerUnit;
         if (ppu <= 0f) return;
 
-        float worldH = cam.orthographicSize * 2f;
-        float worldW = worldH * cam.aspect;
+        float worldW = AutoCamera.WorldRect.width;
+        float worldH = AutoCamera.WorldRect.height;
 
         float spriteW = sp.rect.width / ppu;
         float spriteH = sp.rect.height / ppu;
@@ -58,15 +59,15 @@ public class AutoBackground : MonoBehaviour
 
         var parent = transform.parent;
         Vector3 parentLossy = (parent != null) ? parent.lossyScale : Vector3.one;
-        float invX = (parentLossy.x == 0f) ? 1f : parentLossy.x;
-        float invY = (parentLossy.y == 0f) ? 1f : parentLossy.y;
+        float parentScaleX = (parentLossy.x == 0f) ? 1f : parentLossy.x;
+        float parentScaleY = (parentLossy.y == 0f) ? 1f : parentLossy.y;
 
-        float localX = (worldW / spriteW) / invX;
-        float localY = (worldH / spriteH) / invY;
-        transform.localScale = new Vector3(localX, localY, transform.localScale.z);
+        float localX = (worldW / spriteW) / parentScaleX;
+        float localY = (worldH / spriteH) / parentScaleY;
+        transform.localScale = new Vector3(localX, localY, (localX + localY) / 2f);
 
         var b = sr.bounds;
-        Vector3 camCenter = cam.transform.position;
+        Vector3 camCenter = new Vector3(AutoCamera.WorldRect.center.x, AutoCamera.WorldRect.center.y, cam.transform.position.z);
         Vector3 delta = new Vector3(camCenter.x - b.center.x, camCenter.y - b.center.y, 0f);
         transform.position += delta;
     }

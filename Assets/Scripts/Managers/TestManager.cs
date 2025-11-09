@@ -1,17 +1,17 @@
-#if UNITY_EDITOR
+ï»¿#if UNITY_EDITOR
 using System.Collections;
 using UnityEngine;
 
 public class TestManager : MonoBehaviour
 {
-    public static TestManager Instance { get; private set; }
+    public static TestManager Instance { private set; get; }
 
     [Header("Game Test")]
     [SerializeField] private int testCount = 1;
     [SerializeField] private bool isAutoPlay = false;
     [SerializeField] private bool isAutoReplay = false;
-    [SerializeField][Min(1f)] private float regameTime = 5f;
-    private Coroutine playRoutine;
+    [SerializeField][Min(1f)] private float replayTime = 5f;
+    private Coroutine replayRoutine;
 
     [Header("Sound Test")]
     [SerializeField] private bool bgmPause = false;
@@ -19,9 +19,6 @@ public class TestManager : MonoBehaviour
     [Header("Spawn Test")]
     [SerializeField][Range(0f, 45f)] float angleRange = 30f;
     [SerializeField][Range(0f, 20f)] float shotPower = 15f;
-
-    [Header("ADs Test")]
-    private bool onBanner = false;
 
     private void Awake()
     {
@@ -34,22 +31,26 @@ public class TestManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void Start()
+    {
+        SoundManager.Instance?.ToggleBGM();
+    }
+
     private void Update()
     {
-
-        #region °ÔÀÓ Å×½ºÆ®
+        #region ê²Œìž„ í…ŒìŠ¤íŠ¸
         if (Input.GetKeyDown(KeyCode.P))
             GameManager.Instance?.Pause(!GameManager.Instance.IsPaused);
-        if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.G))
             GameManager.Instance?.GameOver();
 
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.O))
         {
             isAutoReplay = !isAutoReplay;
             AutoPlay();
         }
-        if (isAutoReplay && GameManager.Instance.IsGameOver && playRoutine == null)
-            playRoutine = StartCoroutine(AutoReplay());
+        if (isAutoReplay && GameManager.Instance.IsGameOver && replayRoutine == null)
+            replayRoutine = StartCoroutine(AutoReplay());
 
         if (Input.GetKeyDown(KeyCode.R))
             GameManager.Instance?.Replay();
@@ -57,25 +58,25 @@ public class TestManager : MonoBehaviour
             GameManager.Instance?.Quit();
         #endregion
 
-        #region »ç¿îµå Å×½ºÆ®
+        #region ì‚¬ìš´ë“œ í…ŒìŠ¤íŠ¸
         if (Input.GetKeyDown(KeyCode.B))
         {
             bgmPause = !bgmPause;
-            SoundManager.Instance.Pause(bgmPause);
+            SoundManager.Instance?.PauseSound(bgmPause);
         }
         if (Input.GetKeyDown(KeyCode.M))
-            SoundManager.Instance.ToggleBGM();
+            SoundManager.Instance?.ToggleBGM();
         if (Input.GetKeyDown(KeyCode.N))
-            SoundManager.Instance.ToggleSFX();
+            SoundManager.Instance?.ToggleSFX();
         #endregion
 
-        #region ¿£Æ¼Æ¼ Å×½ºÆ®
+        #region ì—”í‹°í‹° í…ŒìŠ¤íŠ¸
         for (int i = 1; i <= 10; i++)
         {
             KeyCode key = (i == 10) ? KeyCode.Alpha0 : (KeyCode)((int)KeyCode.Alpha0 + i);
-            if (Input.GetKeyDown(key))
+            if (Input.GetKey(key))
             {
-                UnitSystem unit = EntityManager.Instance.Spawn(i);
+                UnitSystem unit = EntityManager.Instance?.Spawn(i);
                 unit.Shoot(Vector2.up * shotPower);
                 break;
             }
@@ -83,37 +84,38 @@ public class TestManager : MonoBehaviour
 
         if (Input.GetKey(KeyCode.W))
         {
-            UnitSystem unit = HandleManager.Instance.GetReady();
+            UnitSystem unit = HandleManager.Instance?.GetReady();
             float angle = Random.Range(-angleRange, angleRange);
             Vector2 dir = Quaternion.Euler(0, 0, angle) * Vector2.up;
             if (unit != null)
             {
                 unit.Shoot(dir * shotPower);
-                EntityManager.Instance.Respawn();
+                EntityManager.Instance?.Respawn();
             }
         }
 
         if (Input.GetKeyDown(KeyCode.S))
-            EntityManager.Instance.Spawn();
+            EntityManager.Instance?.Spawn();
 
         if (Input.GetKeyDown(KeyCode.D))
         {
-            GameManager.Instance.ResetScore();
-            EntityManager.Instance.ResetCount();
-            EntityManager.Instance.DespawnAll();
+            GameManager.Instance?.ResetScore();
+            EntityManager.Instance?.ResetCount();
+            EntityManager.Instance?.DespawnAll();
         }
         #endregion
 
-        #region ±¤°í Å×½ºÆ®
+        #region UI í…ŒìŠ¤íŠ¸
         if (Input.GetKeyDown(KeyCode.Z))
-            ADManager.Instance?.ShowInterAD();
+            UIManager.Instance?.OpenSetting(!UIManager.Instance.GetOnSetting());
         if (Input.GetKeyDown(KeyCode.X))
-            ADManager.Instance?.ShowReward();
+            UIManager.Instance?.OpenConfirm(!UIManager.Instance.GetOnConfirm());
         if (Input.GetKeyDown(KeyCode.C))
-        {
-            ADManager.Instance?.CreateBanner(!onBanner);
-            onBanner = !onBanner;
-        }
+            UIManager.Instance?.OpenHelp(!UIManager.Instance.GetOnHelp());
+        if (Input.GetKeyDown(KeyCode.V))
+            UIManager.Instance?.OpenResult(!UIManager.Instance.GetOnResult());
+        if (Input.GetKeyDown(KeyCode.B))
+            UIManager.Instance?.OpenDetail(!UIManager.Instance.GetOnDetail());
         #endregion
     }
 
@@ -121,28 +123,28 @@ public class TestManager : MonoBehaviour
     {
         if (!isAutoPlay)
         {
-            HandleManager.Instance.SetTimeLimit(0.01f);
+            HandleManager.Instance?.SetTimeLimit(0.01f);
             isAutoPlay = true;
         }
         else
         {
-            HandleManager.Instance.SetTimeLimit(10f);
+            HandleManager.Instance?.SetTimeLimit(10f);
             isAutoPlay = false;
         }
     }
 
     private IEnumerator AutoReplay()
     {
-        if (EntityManager.Instance.GetCount(EntityManager.Instance.GetFinal()) > 0)
+        if (EntityManager.Instance?.GetCount(EntityManager.Instance.GetFinal()) > 0)
             yield return null;
 
-        yield return new WaitForSecondsRealtime(regameTime);
+        yield return new WaitForSecondsRealtime(replayTime);
         if (GameManager.Instance.IsGameOver)
         {
             testCount++;
-            GameManager.Instance.Replay();
+            GameManager.Instance?.Replay();
         }
-        playRoutine = null;
+        replayRoutine = null;
     }
 }
 #endif

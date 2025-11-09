@@ -1,7 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using System.Collections;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -41,11 +41,6 @@ public class EntityManager : MonoBehaviour
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (spawnPos == null)
-            spawnPos = transform.Find("SpawnPos");
-        if (spawnCol == null)
-            spawnCol = spawnPos.GetComponent<Collider2D>();
-
         if (unitBase == null)
             unitBase = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/UnitBase.prefab");
 
@@ -57,7 +52,12 @@ public class EntityManager : MonoBehaviour
             var data = AssetDatabase.LoadAssetAtPath<UnitData>(path);
             if (data != null) list.Add(data);
         }
-        unitDatas = list.OrderBy(d => d.unitID).ThenBy(d => d.unitName).ToArray();
+        unitDatas = list.OrderBy(d => d.ID).ThenBy(d => d.Name).ToArray();
+
+        if (spawnPos == null)
+            spawnPos = transform.Find("SpawnPos");
+        if (spawnCol == null)
+            spawnCol = spawnPos.GetComponent<Collider2D>();
     }
 #endif
 
@@ -75,16 +75,16 @@ public class EntityManager : MonoBehaviour
         for (int i = 0; i < unitDatas.Length; i++)
         {
             var d = unitDatas[i];
-            if (d != null && !dataDic.ContainsKey(d.unitID))
-                dataDic.Add(d.unitID, d);
+            if (d != null && !dataDic.ContainsKey(d.ID))
+                dataDic.Add(d.ID, d);
         }
 
         SetEntity();
         ResetCount();
     }
 
-    #region ¼ÒÈ¯
-    private UnitData FindByID(int _id) => dataDic.TryGetValue(_id, out var data) ? data : null;
+    #region ì†Œí™˜
+    public UnitData FindByID(int _id) => dataDic.TryGetValue(_id, out var data) ? data : null;
 
     public UnitSystem Spawn(int _id = 0, Vector2? _pos = null)
     {
@@ -92,11 +92,11 @@ public class EntityManager : MonoBehaviour
 
         if (_id == 0)
         {
-            int score = GameManager.Instance.GetTotalScore();
+            int score = GameManager.Instance.GetScore();
             int n = (score <= 100) ? 3 : (score <= 500 ? 4 : 5);
 
             respawnID = Random.Range(1, n + 1);
-            OnChangeNext?.Invoke(FindByID(respawnID).unitImage);
+            OnChangeNext?.Invoke(FindByID(respawnID).Image);
         }
 
         if (data == null) return null;
@@ -153,7 +153,7 @@ public class EntityManager : MonoBehaviour
 
             yield return null;
         }
-        HandleManager.Instance.SetReady(Spawn());
+        HandleManager.Instance?.SetReady(Spawn());
         respawnRoutine = null;
     }
 
@@ -168,7 +168,7 @@ public class EntityManager : MonoBehaviour
     }
     #endregion
 
-    #region Á¦°Å
+    #region ì œê±°
     public void Despawn(UnitSystem _unit)
     {
         if (_unit == null) return;
@@ -186,8 +186,8 @@ public class EntityManager : MonoBehaviour
     }
     #endregion
 
-    #region °³¼ö
-    public void AddCount(UnitData _data) => unitCounts[_data.unitID - 1]++;
+    #region ê°œìˆ˜
+    public void CountUp(UnitData _data) => unitCounts[_data.ID - 1]++;
 
     public void ResetCount()
     {
@@ -217,10 +217,10 @@ public class EntityManager : MonoBehaviour
 
     #region GET
     public IReadOnlyList<UnitData> GetDatas() => unitDatas;
-    public int GetFinal() => unitDatas[unitDatas.Length - 1].unitID;
+    public int GetFinal() => unitDatas[unitDatas.Length - 1].ID;
 
     public Vector3 GetSpawnPos() => spawnPos.position;
-    public Sprite GetNextSR() => FindByID(respawnID).unitImage;
+    public Sprite GetNextSR() => FindByID(respawnID).Image;
 
     public IReadOnlyList<UnitSystem> GetUnits() => spawned;
     public int GetCount(int _id) => unitCounts[_id - 1];

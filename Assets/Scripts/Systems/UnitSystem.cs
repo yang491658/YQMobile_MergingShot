@@ -9,9 +9,9 @@ public class UnitSystem : MonoBehaviour
 
     [SerializeField] private UnitData data;
 
-    public bool isFired { get; private set; } = false;
-    public bool isMerging { get; private set; } = false;
-    public bool inHole { get; private set; } = false;
+    public bool isFired { private set; get; } = false;
+    public bool isMerging { private set; get; } = false;
+    public bool inHole { private set; get; } = false;
 
     [SerializeField] private GameObject xMark;
 
@@ -21,32 +21,30 @@ public class UnitSystem : MonoBehaviour
         col = GetComponent<Collider2D>();
         rb = GetComponent<Rigidbody2D>();
 
-        col.isTrigger = true;
-
         xMark = transform.GetChild(0).gameObject;
         xMark.SetActive(false);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D _collision)
     {
-        Merge(collision);
+        Merge(_collision);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D _collision)
     {
         if (!isFired) return;
-        if (collision.CompareTag("Hole")) inHole = true;
+        if (_collision.CompareTag("Hole")) inHole = true;
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    private void OnTriggerExit2D(Collider2D _collision)
     {
         if (!isFired || isMerging || !inHole) return;
-        if (collision.CompareTag("Hole"))
+        if (_collision.CompareTag("Hole"))
         {
             sr.color = new Color32(100, 100, 100, 255);
             xMark.transform.rotation = Quaternion.identity;
             xMark.SetActive(true);
-            GameManager.Instance.GameOver();
+            GameManager.Instance?.GameOver();
         }
     }
 
@@ -57,9 +55,8 @@ public class UnitSystem : MonoBehaviour
         isFired = true;
         col.isTrigger = false;
 
-        if (_isShot) SoundManager.Instance.Shoot();
-
-        EntityManager.Instance.AddCount(data);
+        if (_isShot) SoundManager.Instance?.PlaySFX("Shoot");
+        EntityManager.Instance?.CountUp(data);
     }
 
     private void Merge(Collision2D _collision)
@@ -85,34 +82,30 @@ public class UnitSystem : MonoBehaviour
         Vector2 vB = other.GetVelocity();
         Vector2 vM = (vA + vB) / 2f;
 
-        EntityManager.Instance.Despawn(other);
-        EntityManager.Instance.Despawn(this);
+        EntityManager.Instance?.Despawn(other);
+        EntityManager.Instance?.Despawn(this);
 
         int id = GetID();
         int score = GetScore();
 
-        if (id != EntityManager.Instance.GetFinal())
+        if (id != EntityManager.Instance?.GetFinal())
         {
-            UnitSystem us = EntityManager.Instance.Spawn(id + 1, pM);
+            UnitSystem us = EntityManager.Instance?.Spawn(id + 1, pM);
             us.Shoot(vM, false);
         }
 
-        GameManager.Instance.AddScore(score);
-        SoundManager.Instance.Merge(id);
+        GameManager.Instance?.ScoreUp(score);
+        SoundManager.Instance?.PlaySFX(id + 1 != EntityManager.Instance?.GetFinal() ? "Merge" : "Flame");
     }
 
     #region SET
     public void SetData(UnitData _data)
     {
         data = _data;
-
-        gameObject.name = data.unitName;
-
-        if (data.unitImage != null)
-            sr.sprite = data.unitImage;
-
-        rb.mass = data.unitMass;
-        transform.localScale = Vector3.one * data.unitScale;
+        gameObject.name = data.Name;
+        transform.localScale = Vector3.one * data.Scale;
+        rb.mass = data.Mass;
+        sr.sprite = data.Image;
     }
 
     public void SetOut() => inHole = false;
@@ -121,8 +114,8 @@ public class UnitSystem : MonoBehaviour
     #region GET
     public SpriteRenderer GetSR() => sr;
     public Rigidbody2D GetRB() => rb;
-    public int GetID() => data.unitID;
-    public int GetScore() => data.unitScore;
     public Vector2 GetVelocity() => rb.linearVelocity;
+    public int GetID() => data.ID;
+    public int GetScore() => data.Score;
     #endregion
 }

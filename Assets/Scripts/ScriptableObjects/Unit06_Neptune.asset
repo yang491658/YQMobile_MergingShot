@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d6ddb5dd5df21242b4eb1e04a70a669, type: 3}
+  m_Script: {fileID: 11500000, guid: c151cb3106af89b459d7f5e1bd4e022a, type: 3}
   m_Name: Unit06_Neptune
   m_EditorClassIdentifier: 
-  unitID: 6
-  unitName: Neptune
-  unitImage: {fileID: 21300000, guid: c82a5b7f2512f004683136d53068fabf, type: 3}
-  unitScale: 3.5
-  unitMass: 6
-  unitScore: 21
+  ID: 0
+  Name: 
+  Image: {fileID: 0}
+  Scale: 0
+  Mass: 0
+  Score: 0

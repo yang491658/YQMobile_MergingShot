@@ -1,20 +1,39 @@
-using System.Runtime.InteropServices;
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.SceneManagement;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+using System.Runtime.InteropServices;
+#endif
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { private set; get; }
 
+    [Header("Speed")]
+    [SerializeField] private float speed = 1f;
+    [SerializeField] private float minSpeed = 0.5f;
+    [SerializeField] private float maxSpeed = 2f;
+
     [Header("Score")]
-    [SerializeField] private int totalScore = 0;
+    [SerializeField] private int score = 0;
     public event System.Action<int> OnChangeScore;
 
     public bool IsPaused { private set; get; } = false;
     public bool IsGameOver { private set; get; } = false;
 
+#if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")] private static extern void GameOverReact();
     [DllImport("__Internal")] private static extern void ReplayReact();
+#endif
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        minSpeed = Mathf.Clamp(minSpeed, 0.05f, 1f);
+        maxSpeed = Mathf.Clamp(maxSpeed, 1f, 100f);
+        if (minSpeed > maxSpeed) minSpeed = maxSpeed;
+    }
+#endif
 
     private void Awake()
     {
@@ -43,43 +62,43 @@ public class GameManager : MonoBehaviour
         IsGameOver = false;
         ResetScore();
 
-        SoundManager.Instance.PlayBGM("Default");
+        SoundManager.Instance?.PlayBGM("Default");
 
-        UIManager.Instance.ResetPlayTime();
-        UIManager.Instance.OpenUI(false);
+        UIManager.Instance?.ResetPlayTime();
+        UIManager.Instance?.OpenUI(false);
 
-        EntityManager.Instance.CancelRespawn();
-        EntityManager.Instance.ResetCount();
-        EntityManager.Instance.SetEntity();
-        EntityManager.Instance.Spawn(1);
+        EntityManager.Instance?.CancelRespawn();
+        EntityManager.Instance?.ResetCount();
+        EntityManager.Instance?.SetEntity();
+        EntityManager.Instance?.Spawn(1);
     }
 
-    #region Á¡¼ö
-    public void AddScore(int _score)
+    #region ì ìˆ˜
+    public void ScoreUp(int _score = 1)
     {
-        totalScore += _score;
-        OnChangeScore?.Invoke(totalScore);
+        score += _score;
+        OnChangeScore?.Invoke(score);
     }
 
     public void ResetScore()
     {
-        totalScore = 0;
-        OnChangeScore?.Invoke(totalScore);
+        score = 0;
+        OnChangeScore?.Invoke(score);
     }
     #endregion
 
-    #region ÁøÇà
+    #region ì§„í–‰
     public void Pause(bool _pause)
     {
         if (IsPaused == _pause) return;
 
         IsPaused = _pause;
-        Time.timeScale = _pause ? 0f : 1f;
+        Time.timeScale = _pause ? 0f : speed;
     }
 
     private void ActWithReward(System.Action _act)
     {
-        if (ADManager.Instance != null) ADManager.Instance.ShowReward(_act);
+        if (ADManager.Instance != null) ADManager.Instance?.ShowReward(_act);
         else _act?.Invoke();
     }
 
@@ -91,11 +110,10 @@ public class GameManager : MonoBehaviour
         ActWithReward(ReplayGame);
 #endif
     }
-
     private void ReplayGame()
     {
-        EntityManager.Instance.CancelRespawn();
-        EntityManager.Instance.DespawnAll();
+        EntityManager.Instance?.CancelRespawn();
+        EntityManager.Instance?.DespawnAll();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -116,8 +134,8 @@ public class GameManager : MonoBehaviour
         IsGameOver = true;
 
         Pause(true);
-        SoundManager.Instance.GameOver();
-        UIManager.Instance.OpenResult(true);
+        SoundManager.Instance?.GameOver();
+        UIManager.Instance?.OpenResult(true);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         GameOverReact();
@@ -125,7 +143,18 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    #region SET
+    public void SetSpeed(float _speed)
+    {
+        speed = Mathf.Clamp(_speed, minSpeed, maxSpeed);
+        if (!IsPaused) Time.timeScale = speed;
+    }
+    #endregion
+
     #region GET
-    public int GetTotalScore() => totalScore;
+    public float GetSpeed() => speed;
+    public float GetMinSpeed() => minSpeed;
+    public float GetMaxSpeed() => maxSpeed;
+    public int GetScore() => score;
     #endregion
 }

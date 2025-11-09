@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,51 +10,52 @@ using UnityEditor;
 [System.Serializable]
 public struct PlanetSlot
 {
-    public GameObject go;
-    public Image image;
-    public TextMeshProUGUI text;
+	public GameObject go;
+	public Image image;
+	public TextMeshProUGUI text;
 
-    public PlanetSlot(GameObject obj)
-    {
-        go = obj;
-        image = null;
-        for (int i = 0; i < obj.transform.childCount; i++)
-        {
-            var img = obj.transform.GetChild(i).GetComponent<Image>();
-            if (img != null) { image = img; break; }
-        }
+	public PlanetSlot(GameObject obj)
+	{
+		go = obj;
+		image = null;
+		for (int i = 0; i < obj.transform.childCount; i++)
+		{
+			var img = obj.transform.GetChild(i).GetComponent<Image>();
+			if (img != null) { image = img; break; }
+		}
 
-        text = obj.GetComponentInChildren<TextMeshProUGUI>();
-    }
+		text = obj.GetComponentInChildren<TextMeshProUGUI>();
+	}
 }
 
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance { get; private set; }
+    public static UIManager Instance { private set; get; }
 
     public event System.Action<bool> OnOpenUI;
 
     [Header("InGame UI")]
     [SerializeField] private GameObject inGameUI;
-    [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI playTimeText;
     private float playTime = 0f;
-    [SerializeField] private Image nextImage;
+    [SerializeField] private TextMeshProUGUI scoreNum;
+	[SerializeField] private Image nextImage;
 
-    [Header("InGame UI / Timer")]
-    [SerializeField] private Slider timerSlider;
-    [SerializeField] private Image timerImage;
-    [SerializeField] private TextMeshProUGUI timerText;
-    [Space]
-    [SerializeField] private float shakeSpeed = 50f;
-    [SerializeField] private float shakeAmount = 8f;
-    [SerializeField] private Vector2 textSize = new Vector2(0f, 120f);
-    private Vector2 timerPos0;
-    private int lastCountSfx = -1;
+	[Header("InGame UI / Timer")]
+	[SerializeField] private Slider timerSlider;
+	[SerializeField] private Image timerImage;
+	[SerializeField] private TextMeshProUGUI timerTitle;
+	[Space]
+	[SerializeField] private float shakeSpeed = 50f;
+	[SerializeField] private float shakeAmount = 8f;
+	[SerializeField] private Vector2 textSize = new Vector2(0f, 120f);
+	private Vector2 timerPos0;
+	private int lastCountSfx = -1;
 
-    [Header("Setting UI")]
+	[Header("Setting UI")]
     [SerializeField] private GameObject settingUI;
-    [SerializeField] private TextMeshProUGUI settingScoreText;
+    [SerializeField] private TextMeshProUGUI settingScoreNum;
+    [SerializeField] private Slider speedSlider;
 
     [Header("Sound UI")]
     [SerializeField] private Slider bgmSlider;
@@ -66,20 +67,20 @@ public class UIManager : MonoBehaviour
 
     [Header("Confirm UI")]
     [SerializeField] private GameObject confirmUI;
-    [SerializeField] private TextMeshProUGUI confirmText;
+    [SerializeField] private TextMeshProUGUI confirmTitle;
     private System.Action confirmAction;
 
-    [Header("Help UI")]
-    [SerializeField] private GameObject helpUI;
-    [SerializeField] private List<PlanetSlot> helpPlanets = new List<PlanetSlot>();
+	[Header("Help UI")]
+	[SerializeField] private GameObject helpUI;
+	[SerializeField] private List<PlanetSlot> helpPlanets = new List<PlanetSlot>();
 
-    [Header("Game Over UI")]
+	[Header("Result UI")]
     [SerializeField] private GameObject resultUI;
-    [SerializeField] private TextMeshProUGUI resultScoreText;
+    [SerializeField] private TextMeshProUGUI resultScoreNum;
 
-    [Header("Result UI")]
+    [Header("Detail UI")]
     [SerializeField] private GameObject detailUI;
-    [SerializeField] private TextMeshProUGUI detailScoreText;
+    [SerializeField] private TextMeshProUGUI detailScoreNum;
     [SerializeField] private List<PlanetSlot> detailPlanets = new List<PlanetSlot>();
 
 #if UNITY_EDITOR
@@ -87,33 +88,35 @@ public class UIManager : MonoBehaviour
     {
         if (inGameUI == null)
             inGameUI = GameObject.Find("InGameUI");
-        if (scoreText == null)
-            scoreText = GameObject.Find("InGameUI/Score/ScoreText").GetComponent<TextMeshProUGUI>();
         if (playTimeText == null)
             playTimeText = GameObject.Find("InGameUI/Score/PlayTimeText")?.GetComponent<TextMeshProUGUI>();
-        if (nextImage == null)
-            nextImage = GameObject.Find("InGameUI/Next/NextImage").GetComponent<Image>();
+        if (scoreNum == null)
+            scoreNum = GameObject.Find("InGameUI/Score/ScoreNum")?.GetComponent<TextMeshProUGUI>();
+		if (nextImage == null)
+			nextImage = GameObject.Find("InGameUI/Next/NextImage").GetComponent<Image>();
 
-        if (timerSlider == null)
-            timerSlider = GameObject.Find("InGameUI/Timer").GetComponentInChildren<Slider>();
-        if (timerImage == null)
-            timerImage = GameObject.Find("InGameUI/Timer").GetComponentInChildren<Image>();
-        if (timerText == null)
-            timerText = GameObject.Find("InGameUI/Timer").GetComponentInChildren<TextMeshProUGUI>();
+		if (timerSlider == null)
+			timerSlider = GameObject.Find("InGameUI/Timer").GetComponentInChildren<Slider>();
+		if (timerImage == null)
+			timerImage = GameObject.Find("InGameUI/Timer").GetComponentInChildren<Image>();
+		if (timerTitle == null)
+			timerTitle = GameObject.Find("InGameUI/Timer").GetComponentInChildren<TextMeshProUGUI>();
 
-        if (settingUI == null)
+		if (settingUI == null)
             settingUI = GameObject.Find("SettingUI");
-        if (settingScoreText == null)
-            settingScoreText = GameObject.Find("SettingUI/Box/Score/ScoreText").GetComponent<TextMeshProUGUI>();
+        if (settingScoreNum == null)
+            settingScoreNum = GameObject.Find("SettingUI/Box/Score/ScoreNum")?.GetComponent<TextMeshProUGUI>();
+        if (speedSlider == null)
+            speedSlider = GameObject.Find("Speed/SpeedSlider")?.GetComponent<Slider>();
 
         if (bgmSlider == null)
-            bgmSlider = GameObject.Find("BGM/BgmSlider").GetComponent<Slider>();
+            bgmSlider = GameObject.Find("BGM/BgmSlider")?.GetComponent<Slider>();
         if (sfxSlider == null)
-            sfxSlider = GameObject.Find("SFX/SfxSlider").GetComponent<Slider>();
+            sfxSlider = GameObject.Find("SFX/SfxSlider")?.GetComponent<Slider>();
         if (bgmIcon == null)
-            bgmIcon = GameObject.Find("BGM/BgmBtn/BgmIcon").GetComponent<Image>();
+            bgmIcon = GameObject.Find("BGM/BgmBtn/BgmIcon")?.GetComponent<Image>();
         if (sfxIcon == null)
-            sfxIcon = GameObject.Find("SFX/SfxBtn/SfxIcon").GetComponent<Image>();
+            sfxIcon = GameObject.Find("SFX/SfxBtn/SfxIcon")?.GetComponent<Image>();
 
         bgmIcons.Clear();
         LoadSprite(bgmIcons, "White Music");
@@ -125,30 +128,30 @@ public class UIManager : MonoBehaviour
 
         if (confirmUI == null)
             confirmUI = GameObject.Find("ConfirmUI");
-        if (confirmText == null)
-            confirmText = GameObject.Find("ConfirmUI/Box/ConfirmText").GetComponent<TextMeshProUGUI>();
+        if (confirmTitle == null)
+            confirmTitle = GameObject.Find("ConfirmUI/Box/ConfirmTitle")?.GetComponent<TextMeshProUGUI>();
 
-        if (helpUI == null)
-            helpUI = GameObject.Find("HelpUI");
-        if (helpPlanets == null || helpPlanets.Count == 0)
-            foreach (Transform child in GameObject.Find("HelpUI/Planets").transform)
-                helpPlanets.Add(new PlanetSlot(child.gameObject));
+		if (helpUI == null)
+			helpUI = GameObject.Find("HelpUI");
+		if (helpPlanets == null || helpPlanets.Count == 0)
+			foreach (Transform child in GameObject.Find("HelpUI/Planets").transform)
+				helpPlanets.Add(new PlanetSlot(child.gameObject));
 
-        if (resultUI == null)
+		if (resultUI == null)
             resultUI = GameObject.Find("ResultUI");
-        if (resultScoreText == null)
-            resultScoreText = GameObject.Find("ResultUI/Score/ScoreText").GetComponent<TextMeshProUGUI>();
+        if (resultScoreNum == null)
+            resultScoreNum = GameObject.Find("ResultUI/Score/ScoreNum")?.GetComponent<TextMeshProUGUI>();
 
         if (detailUI == null)
             detailUI = GameObject.Find("DetailUI");
-        if (detailScoreText == null)
-            detailScoreText = GameObject.Find("DetailUI/Score/ScoreText").GetComponent<TextMeshProUGUI>();
+        if (detailScoreNum == null)
+            detailScoreNum = GameObject.Find("DetailUI/Score/ScoreNum").GetComponent<TextMeshProUGUI>();
         if (detailPlanets == null || detailPlanets.Count == 0)
             foreach (Transform child in GameObject.Find("DetailUI/Planets").transform)
                 detailPlanets.Add(new PlanetSlot(child.gameObject));
     }
 
-    private static void LoadSprite(List<Sprite> _list, string _sprite)
+    private void LoadSprite(List<Sprite> _list, string _sprite)
     {
         if (string.IsNullOrEmpty(_sprite)) return;
         string[] guids = AssetDatabase.FindAssets("t:Sprite", new[] { "Assets/Imports/Dark UI/Icons" });
@@ -182,23 +185,28 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        UpdateScore(GameManager.Instance.GetTotalScore());
-        UpdateNext(EntityManager.Instance.GetNextSR());
+        UpdateScore(GameManager.Instance.GetScore());
+		UpdateNext(EntityManager.Instance?.GetNextSR());
 
-        timerPos0 = ((RectTransform)timerSlider.transform).anchoredPosition;
-    }
+		timerPos0 = ((RectTransform)timerSlider.transform).anchoredPosition;
+	}
 
     private void Update()
     {
-        if (GameManager.Instance.IsPaused || GameManager.Instance.IsGameOver) return;
+        if (GameManager.Instance.IsGameOver) return;
 
-        playTime += Time.deltaTime;
+        playTime += Time.unscaledDeltaTime;
         UpdatePlayTime();
     }
 
     private void OnEnable()
     {
         GameManager.Instance.OnChangeScore += UpdateScore;
+        speedSlider.minValue = GameManager.Instance.GetMinSpeed();
+        speedSlider.maxValue = GameManager.Instance.GetMaxSpeed();
+        speedSlider.wholeNumbers = false;
+        speedSlider.value = GameManager.Instance.GetSpeed();
+        speedSlider.onValueChanged.AddListener(GameManager.Instance.SetSpeed);
 
         SoundManager.Instance.OnChangeVolume += UpdateVolume;
         bgmSlider.value = SoundManager.Instance.GetBGMVolume();
@@ -206,29 +214,30 @@ public class UIManager : MonoBehaviour
         sfxSlider.value = SoundManager.Instance.GetSFXVolume();
         sfxSlider.onValueChanged.AddListener(SoundManager.Instance.SetSFXVolume);
 
-        HandleManager.Instance.OnChangeTimer += UpdateTimer;
+		HandleManager.Instance.OnChangeTimer += UpdateTimer;
 
-        EntityManager.Instance.OnChangeNext += UpdateNext;
+		EntityManager.Instance.OnChangeNext += UpdateNext;
 
-        OnOpenUI += GameManager.Instance.Pause;
+		OnOpenUI += GameManager.Instance.Pause;
     }
 
     private void OnDisable()
     {
         GameManager.Instance.OnChangeScore -= UpdateScore;
+		speedSlider.onValueChanged.RemoveListener(GameManager.Instance.SetSpeed);
 
         SoundManager.Instance.OnChangeVolume -= UpdateVolume;
         bgmSlider.onValueChanged.RemoveListener(SoundManager.Instance.SetBGMVolume);
         sfxSlider.onValueChanged.RemoveListener(SoundManager.Instance.SetSFXVolume);
 
-        HandleManager.Instance.OnChangeTimer -= UpdateTimer;
+		HandleManager.Instance.OnChangeTimer -= UpdateTimer;
 
-        EntityManager.Instance.OnChangeNext -= UpdateNext;
+		EntityManager.Instance.OnChangeNext -= UpdateNext;
 
         OnOpenUI -= GameManager.Instance.Pause;
     }
 
-    #region OPEN
+    #region ì˜¤í”ˆ
     public void OpenUI(bool _on)
     {
         OpenDetail(_on);
@@ -236,16 +245,15 @@ public class UIManager : MonoBehaviour
         OpenHelp(_on);
         OpenConfirm(_on);
         OpenSetting(_on);
-    }
+	}
 
-    public void OpenSetting(bool _on)
+	public void OpenSetting(bool _on)
     {
         if (settingUI == null) return;
 
-        OnOpenUI?.Invoke(_on);
-
         inGameUI.SetActive(!_on);
         settingUI.SetActive(_on);
+        OnOpenUI?.Invoke(_on);
     }
 
     public void OpenConfirm(bool _on, string _text = null, System.Action _action = null, bool _pass = false)
@@ -255,43 +263,45 @@ public class UIManager : MonoBehaviour
         if (!_pass)
         {
             confirmUI.SetActive(_on);
-            confirmText.text = $"{_text}ÇÏ½Ã°Ú½À´Ï±î?";
-            confirmAction = _action;
+            if (_on)
+            {
+                confirmTitle.text = $"{_text}í•˜ì‹œê² ìŠµë‹ˆê¹Œ?";
+                confirmAction = _action;
+            }
         }
 
-        if (!_on) confirmAction = null;
+        if (!_on)
+        {
+            confirmTitle.text = string.Empty;
+            confirmAction = null;
+        }
 
         if (_pass) _action?.Invoke();
-    }
+	}
 
-    public void OpenHelp(bool _on)
-    {
-        if (helpUI == null) return;
+	public void OpenHelp(bool _on)
+	{
+		if (helpUI == null) return;
 
-        OnOpenUI?.Invoke(_on);
+		helpUI.SetActive(_on);
+		for (int i = 0; i < helpPlanets.Count; i++)
+		{
+			var u = EntityManager.Instance?.GetDatas()[i];
 
-        helpUI.SetActive(_on);
-        for (int i = 0; i < helpPlanets.Count; i++)
-        {
-            var u = EntityManager.Instance.GetDatas()[i];
+			helpPlanets[i].go.name = u.Name;
+			helpPlanets[i].image.sprite = u.Image;
+			helpPlanets[i].text.text = u.Name;
+		}
+		OnOpenUI?.Invoke(_on);
+	}
 
-            helpPlanets[i].go.name = u.unitName;
-            helpPlanets[i].image.sprite = u.unitImage;
-            helpPlanets[i].text.text = u.unitName;
-        }
-    }
-    public void OpenResult(bool _on)
+	public void OpenResult(bool _on)
     {
         if (resultUI == null) return;
 
-        OnOpenUI?.Invoke(_on);
-
         inGameUI.SetActive(!_on);
-        settingUI.SetActive(!_on);
-        confirmUI.SetActive(!_on);
-        helpUI.SetActive(!_on);
-
         resultUI.SetActive(_on);
+        OnOpenUI?.Invoke(_on);
     }
 
     public void OpenDetail(bool _on)
@@ -301,19 +311,19 @@ public class UIManager : MonoBehaviour
         detailUI.SetActive(_on);
         for (int i = 0; i < detailPlanets.Count; i++)
         {
-            var u = EntityManager.Instance.GetDatas()[i];
+            var u = EntityManager.Instance?.GetDatas()[i];
 
-            detailPlanets[i].go.name = u.unitName;
-            detailPlanets[i].image.sprite = u.unitImage;
-            detailPlanets[i].text.text = EntityManager.Instance.GetCount(u.unitID).ToString("¡¿00");
+            detailPlanets[i].go.name = u.Name;
+            detailPlanets[i].image.sprite = u.Image;
+            detailPlanets[i].text.text = EntityManager.Instance?.GetCount(u.ID).ToString("Ã—00");
         }
     }
     #endregion
 
-    #region UPDATE
+    #region ì—…ë°ì´íŠ¸
     public void ResetPlayTime() => playTime = 0;
 
-    private void UpdatePlayTime()
+    public void UpdatePlayTime()
     {
         int total = Mathf.FloorToInt(playTime);
         string s = (total / 60).ToString("00") + ":" + (total % 60).ToString("00");
@@ -322,13 +332,74 @@ public class UIManager : MonoBehaviour
 
     public void UpdateScore(int _score)
     {
-        scoreText.text = _score.ToString("0000");
-        settingScoreText.text = _score.ToString("0000");
-        resultScoreText.text = _score.ToString("0000");
-        detailScoreText.text = _score.ToString("0000");
+        string s = _score.ToString("0000");
+        scoreNum.text = s;
+        settingScoreNum.text = s;
+        resultScoreNum.text = s;
     }
 
-    private void UpdateVolume(SoundType _type, float _volume)
+	private void UpdateNext(Sprite _sprite) => nextImage.sprite = _sprite;
+
+	private void UpdateTimer(float _timer, float _max)
+	{
+		bool isReady = HandleManager.Instance?.GetReady() != null;
+		bool showSlider = isReady && _max >= 3f;
+		timerSlider.gameObject.SetActive(showSlider);
+		if (!showSlider)
+		{
+			timerTitle.gameObject.SetActive(false);
+			((RectTransform)timerSlider.transform).anchoredPosition = timerPos0;
+			timerImage.color = Color.white;
+			timerTitle.color = Color.white;
+			lastCountSfx = -1;
+			return;
+		}
+
+		float remain = Mathf.Clamp(_max - _timer, 0f, _max);
+		timerSlider.value = Mathf.Clamp01(remain / _max);
+
+		var rt = (RectTransform)timerSlider.transform;
+
+		if (remain > 3f || remain <= 0f)
+		{
+			timerTitle.gameObject.SetActive(false);
+			rt.anchoredPosition = timerPos0;
+			timerImage.color = Color.white;
+			timerTitle.color = Color.white;
+			lastCountSfx = -1;
+			return;
+		}
+
+		int current = Mathf.Clamp(Mathf.CeilToInt(remain), 1, 3);
+		if (current != lastCountSfx)
+		{
+			SoundManager.Instance?.PlaySFX("Count");
+			lastCountSfx = current;
+		}
+
+		bool showText = _max >= 8f;
+		timerTitle.gameObject.SetActive(showText);
+		if (showText)
+		{
+			timerTitle.text = current.ToString();
+			float frac = remain - Mathf.Floor(remain);
+			float size = Mathf.Sin(frac * Mathf.PI) * textSize.y;
+			timerTitle.fontSize = size;
+		}
+
+		float t = Mathf.InverseLerp(3f, 0f, remain);
+		Color color = Color.Lerp(Color.white, Color.red, t);
+		timerImage.color = color;
+		if (showText) timerTitle.color = color;
+
+		float intensity = 1f - Mathf.Clamp01(remain / 3f);
+		float amp = shakeAmount * intensity * intensity;
+		float sx = Mathf.Sign(Mathf.Sin(Time.unscaledTime * shakeSpeed));
+		float sy = Mathf.Sign(Mathf.Cos(Time.unscaledTime * shakeSpeed));
+		rt.anchoredPosition = timerPos0 + new Vector2(sx, sy) * amp;
+	}
+
+	public void UpdateVolume(SoundType _type, float _volume)
     {
         switch (_type)
         {
@@ -345,10 +416,10 @@ public class UIManager : MonoBehaviour
             default:
                 return;
         }
-        UpdateIcon();
+        UpdateSoundIcon();
     }
 
-    private void UpdateIcon()
+    public void UpdateSoundIcon()
     {
         if (bgmIcons.Count >= 2)
             bgmIcon.sprite = SoundManager.Instance.IsBGMMuted() ? bgmIcons[1] : bgmIcons[0];
@@ -357,93 +428,46 @@ public class UIManager : MonoBehaviour
         {
             if (SoundManager.Instance.IsSFXMuted())
                 sfxIcon.sprite = sfxIcons[2];
-            else if (SoundManager.Instance.GetSFXVolume() < 0.2f)
+            else if (SoundManager.Instance?.GetSFXVolume() < 0.2f)
                 sfxIcon.sprite = sfxIcons[1];
             else
                 sfxIcon.sprite = sfxIcons[0];
         }
     }
-
-    private void UpdateNext(Sprite _sprite) => nextImage.sprite = _sprite;
-
-    private void UpdateTimer(float _timer, float _max)
-    {
-        bool isReady = HandleManager.Instance.GetReady() != null;
-        bool showSlider = isReady && _max >= 3f;
-        timerSlider.gameObject.SetActive(showSlider);
-        if (!showSlider)
-        {
-            timerText.gameObject.SetActive(false);
-            ((RectTransform)timerSlider.transform).anchoredPosition = timerPos0;
-            timerImage.color = Color.white;
-            timerText.color = Color.white;
-            lastCountSfx = -1;
-            return;
-        }
-
-        float remain = Mathf.Clamp(_max - _timer, 0f, _max);
-        timerSlider.value = Mathf.Clamp01(remain / _max);
-
-        var rt = (RectTransform)timerSlider.transform;
-
-        if (remain > 3f || remain <= 0f)
-        {
-            timerText.gameObject.SetActive(false);
-            rt.anchoredPosition = timerPos0;
-            timerImage.color = Color.white;
-            timerText.color = Color.white;
-            lastCountSfx = -1;
-            return;
-        }
-
-        int current = Mathf.Clamp(Mathf.CeilToInt(remain), 1, 3);
-        if (current != lastCountSfx)
-        {
-            SoundManager.Instance.Count();
-            lastCountSfx = current;
-        }
-
-        bool showText = _max >= 8f;
-        timerText.gameObject.SetActive(showText);
-        if (showText)
-        {
-            timerText.text = current.ToString();
-            float frac = remain - Mathf.Floor(remain);
-            float size = Mathf.Sin(frac * Mathf.PI) * textSize.y;
-            timerText.fontSize = size;
-        }
-
-        float t = Mathf.InverseLerp(3f, 0f, remain);
-        Color color = Color.Lerp(Color.white, Color.red, t);
-        timerImage.color = color;
-        if (showText) timerText.color = color;
-
-        float intensity = 1f - Mathf.Clamp01(remain / 3f);
-        float amp = shakeAmount * intensity * intensity;
-        float sx = Mathf.Sign(Mathf.Sin(Time.unscaledTime * shakeSpeed));
-        float sy = Mathf.Sign(Mathf.Cos(Time.unscaledTime * shakeSpeed));
-        rt.anchoredPosition = timerPos0 + new Vector2(sx, sy) * amp;
-    }
     #endregion
 
-    #region ¹öÆ°
-    public void OnClickSetting() => OpenSetting(true);
-    public void OnClickHelp() => OpenHelp(true);
+    #region ë²„íŠ¼
     public void OnClickClose() => OpenUI(false);
+    public void OnClickSetting() => OpenSetting(true);
 
-    public void OnClickBGM() => SoundManager.Instance.ToggleBGM();
-    public void OnClickSFX() => SoundManager.Instance.ToggleSFX();
+	public void OnClickSpeed()
+    {
+        if (speedSlider.value != 1f)
+            speedSlider.value = 1f;
+        else
+            speedSlider.value = speedSlider.maxValue;
+    }
+    public void OnClickBGM() => SoundManager.Instance?.ToggleBGM();
+    public void OnClickSFX() => SoundManager.Instance?.ToggleSFX();
 
-    public void OnClickReplay() => OpenConfirm(true, "´Ù½Ã", GameManager.Instance.Replay);
-    public void OnClickQuit() => OpenConfirm(true, "Á¾·á", GameManager.Instance.Quit);
+    public void OnClickReplay() => OpenConfirm(true, "ë‹¤ì‹œ", GameManager.Instance.Replay);
+    public void OnClickQuit() => OpenConfirm(true, "ì¢…ë£Œ", GameManager.Instance.Quit);
 
-    public void OnClickReplayByPass() => OpenConfirm(true, "´Ù½Ã", GameManager.Instance.Replay, true);
-    public void OnClickQuitByPass() => OpenConfirm(true, "Á¾·á", GameManager.Instance.Quit, true);
+    public void OnClickOkay()
+    {
+        var action = confirmAction;
+        OpenConfirm(false);
+        action?.Invoke();
+    }
+    public void OnClickCancel() => OpenConfirm(false);
+
+    public void OnClickReplayDirect() => OpenConfirm(true, "ë‹¤ì‹œ", GameManager.Instance.Replay, true);
+    public void OnClickQuitDirect() => OpenConfirm(true, "ì¢…ë£Œ", GameManager.Instance.Quit, true);
+
+	public void OnClickHelp() => OpenHelp(true);
+
     public void OnClickDetail() => OpenDetail(true);
     public void OnClickBack() => OpenDetail(false);
-
-    public void OnClickOkay() => confirmAction?.Invoke();
-    public void OnClickCancel() => OpenConfirm(false);
     #endregion
 
     #region SET
@@ -457,6 +481,8 @@ public class UIManager : MonoBehaviour
     #region GET
     public bool GetOnSetting() => settingUI.activeSelf;
     public bool GetOnConfirm() => confirmUI.activeSelf;
+    public bool GetOnHelp() => helpUI.activeSelf;
     public bool GetOnResult() => resultUI.activeSelf;
+    public bool GetOnDetail() => detailUI.activeSelf;
     #endregion
 }
