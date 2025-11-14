@@ -34,10 +34,6 @@ public class EntityManager : MonoBehaviour
     [SerializeField] private List<int> unitCounts = new List<int>();
     [SerializeField] private List<UnitSystem> spawned = new List<UnitSystem>();
 
-    [Header("Entity / Standard")]
-    [SerializeField] private float holeY = 5f;
-    [SerializeField] private float spawnPosY = -6f;
-
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -203,15 +199,8 @@ public class EntityManager : MonoBehaviour
         if (hole == null) hole = FindFirstObjectByType<HoleSystem>().transform;
         if (units == null) units = GameObject.Find("InGame/Units").transform;
 
-        float d = AutoCamera.SizeDelta;
-
-        Vector3 hp = hole.position;
-        hp.y = holeY + d;
-        hole.position = hp;
-
-        Vector3 sp = spawnPos.position;
-        sp.y = spawnPosY - d;
-        spawnPos.position = sp;
+        hole.position = new Vector3(AutoCamera.WorldRect.center.x, AutoCamera.WorldRect.yMax* 0.4f, 0f);
+        spawnPos.position = new Vector3(AutoCamera.WorldRect.center.x, AutoCamera.WorldRect.yMin * 0.5f, 0f);
     }
     #endregion
 
