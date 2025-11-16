@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections;
-
 
 #if UNITY_EDITOR
 using UnityEditor;
