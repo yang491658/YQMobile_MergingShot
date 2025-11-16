@@ -2564,6 +2564,9 @@ MonoBehaviour:
   powerCoef: 3
   timeLimit: 10
   angleLimit: 45
+  markDuration: 1
+  markRadius: 0.5
+  markSegment: 24
 --- !u!4 &198834868
 Transform:
   m_ObjectHideFlags: 0
@@ -6382,7 +6385,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.3183594, y: 1.5625, z: 1.4404297}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -12893,7 +12896,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1638876044
 MonoBehaviour:
   m_ObjectHideFlags: 0
