@@ -11350,7 +11350,7 @@ MonoBehaviour:
   testCount: 1
   isAutoPlay: 0
   isAutoReplay: 0
-  replayTime: 5
+  replayTime: 1
   bgmPause: 0
   angleRange: 30
   shotPower: 15
