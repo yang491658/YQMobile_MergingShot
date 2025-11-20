@@ -11,12 +11,12 @@ public class EntityManager : MonoBehaviour
 {
     public static EntityManager Instance { private set; get; }
 
-    [Header("Data")]
+    [Header("Data Settings")]
     [SerializeField] private GameObject unitBase;
     [SerializeField] private UnitData[] unitDatas;
     private readonly Dictionary<int, UnitData> dataDic = new Dictionary<int, UnitData>();
 
-    [Header("Spawn")]
+    [Header("Spawn Settings")]
     [SerializeField] private Transform spawnPos;
     [SerializeField] private Collider2D spawnCol;
     [SerializeField] private int respawnID = 1;
@@ -27,7 +27,7 @@ public class EntityManager : MonoBehaviour
     private Coroutine respawnRoutine;
     private float respawnTime = 0f;
 
-    [Header("Entity")]
+    [Header("InGame Settings")]
     [SerializeField] private Transform inGame;
     [SerializeField] private Transform hole;
     [SerializeField] private Transform units;

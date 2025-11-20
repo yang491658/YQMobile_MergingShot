@@ -28,7 +28,7 @@ public class HandleManager : MonoBehaviour
     private Vector3 dragCurrent;
     private bool isOverUI;
 
-    [Header("Unit")]
+    [Header("Units")]
     [SerializeField] private UnitSystem ready;
     [SerializeField] private UnitSystem hovered;
     [SerializeField] private UnitSystem selected;
