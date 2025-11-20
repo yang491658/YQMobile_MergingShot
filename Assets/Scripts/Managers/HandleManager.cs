@@ -28,12 +28,12 @@ public class HandleManager : MonoBehaviour
     private Vector3 dragCurrent;
     private bool isOverUI;
 
-    [Header("Units")]
+    [Header("Unit")]
     [SerializeField] private UnitSystem ready;
     [SerializeField] private UnitSystem hovered;
     [SerializeField] private UnitSystem selected;
 
-    [Header("Aim Dots")]
+    [Header("Aim Dot")]
     [SerializeField] private GameObject dotPrefab;
     [SerializeField] private int dotCount = 12;
     [SerializeField] private float dotSpacing = 0.5f;
