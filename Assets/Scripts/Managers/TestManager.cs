@@ -7,8 +7,8 @@ public class TestManager : MonoBehaviour
 
     [Header("Game Test")]
     [SerializeField] private int testCount = 1;
-    [SerializeField][Min(1f)] private float autoDelay = 1f;
-    private bool isAuto = false;
+    [SerializeField] private bool isAuto = false;
+    [SerializeField][Min(1f)] private float autoReplay = 1f;
     private Coroutine autoRoutine;
 
     [Header("Sound Test")]
@@ -42,13 +42,8 @@ public class TestManager : MonoBehaviour
             GameManager.Instance?.Quit();
 
         if (Input.GetKeyDown(KeyCode.O))
-        {
-            isAuto = !isAuto;
-
             AutoPlay();
-            GameManager.Instance?.Replay();
-        }
-        if (isAuto && !GameManager.Instance.IsPaused)
+        if (isAuto)
             if (GameManager.Instance.IsGameOver && autoRoutine == null)
                 autoRoutine = StartCoroutine(AutoReplay());
         #endregion
@@ -112,16 +107,9 @@ public class TestManager : MonoBehaviour
 
     private void AutoPlay()
     {
-        if (!isAuto)
-        {
-            HandleManager.Instance?.SetTimeLimit(0.01f);
-            isAuto = true;
-        }
-        else
-        {
-            HandleManager.Instance?.SetTimeLimit(10f);
-            isAuto = false;
-        }
+        isAuto = !isAuto;
+
+        HandleManager.Instance?.SetTimeLimit(isAuto ? 0.01f : 10f);
     }
 
     private IEnumerator AutoReplay()
@@ -129,7 +117,7 @@ public class TestManager : MonoBehaviour
         if (EntityManager.Instance?.GetCount(EntityManager.Instance.GetFinal()) > 0)
             yield return null;
 
-        yield return new WaitForSecondsRealtime(autoDelay);
+        yield return new WaitForSecondsRealtime(autoReplay);
         if (GameManager.Instance.IsGameOver)
         {
             testCount++;
