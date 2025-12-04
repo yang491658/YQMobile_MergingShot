@@ -50,6 +50,8 @@ public class GameManager : MonoBehaviour
         Pause(false);
         IsGameOver = false;
 
+        ResetScore();
+
         EntityManager.Instance?.CancelRespawn();
         EntityManager.Instance?.ResetCount();
         EntityManager.Instance?.SetEntity();
@@ -58,8 +60,6 @@ public class GameManager : MonoBehaviour
         UIManager.Instance?.ResetUI();
         UIManager.Instance?.OpenUI(false);
         UIManager.Instance?.StartCountdown();
-
-        ResetScore();
     }
 
     #region 진행

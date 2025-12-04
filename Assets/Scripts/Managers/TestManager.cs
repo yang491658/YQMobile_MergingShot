@@ -29,6 +29,11 @@ public class TestManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void Start()
+    {
+        AutoPlay();
+    }
+
     private void Update()
     {
         #region 게임 테스트
@@ -109,6 +114,8 @@ public class TestManager : MonoBehaviour
     {
         isAuto = !isAuto;
 
+        SoundManager.Instance?.ToggleBGM();
+        SoundManager.Instance?.ToggleSFX();
         HandleManager.Instance?.SetTimeLimit(isAuto ? 0.01f : 10f);
     }
 
