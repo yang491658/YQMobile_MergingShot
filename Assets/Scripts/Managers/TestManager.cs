@@ -1,13 +1,38 @@
 ﻿using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
+[System.Serializable]
+public struct SliderConfig
+{
+    public TextMeshProUGUI TMP;
+    public Slider slider;
+    public int value;
+    public int minValue;
+    public int maxValue;
+    public string format;
+
+    public SliderConfig(int _value, int _min, int _max, string _format)
+    {
+        TMP = null;
+        slider = null;
+        value = _value;
+        minValue = _min;
+        maxValue = _max;
+        format = _format;
+    }
+}
 
 public class TestManager : MonoBehaviour
 {
     public static TestManager Instance { private set; get; }
 
     [Header("Game Test")]
-    [SerializeField] private int testCount = 1;
-    [SerializeField] private int maxScore = 0;
+    [SerializeField][Min(0)] private int testCount = 1;
+    [SerializeField][Min(0)] private int maxScore = 0;
+    private int totalScore = 0;
+    [SerializeField][Min(0)] private int averageScore = 0;
     [SerializeField] private bool isAuto = false;
     [SerializeField][Min(1f)] private float autoReplay = 1f;
     private Coroutine autoRoutine;
@@ -15,9 +40,51 @@ public class TestManager : MonoBehaviour
     [Header("Sound Test")]
     [SerializeField] private bool bgmPause = false;
 
-    [Header("Spawn Test")]
-    [SerializeField][Range(0f, 45f)] float angleRange = 30f;
-    [SerializeField][Range(0f, 20f)] float shotPower = 15f;
+    [Header("Test UI")]
+    [SerializeField] private GameObject testUI;
+    [Space]
+    [SerializeField] private SliderConfig gameSpeed = new SliderConfig(1, 1, 3, "배속 × {0}");
+    [Space]
+    [SerializeField] private TextMeshProUGUI testCountNum;
+    [SerializeField] private TextMeshProUGUI maxScoreNum;
+    [SerializeField] private TextMeshProUGUI averageScoreNum;
+    [Space]
+    [SerializeField] private SliderConfig timeLimit = new SliderConfig(10, 1, 10, "시간제한 : {0}");
+    [SerializeField] private SliderConfig angleRange = new SliderConfig(30, 0, 45, "각도범위 : {0}");
+    [SerializeField] private SliderConfig shotPower = new SliderConfig(15, 0, 20, "발사파워 : {0}");
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (testUI == null)
+            testUI = GameObject.Find("TestUI");
+
+        if (gameSpeed.TMP == null)
+            gameSpeed.TMP = GameObject.Find("TestUI/GameSpeed/TestText")?.GetComponent<TextMeshProUGUI>();
+        if (gameSpeed.slider == null)
+            gameSpeed.slider = GameObject.Find("TestUI/GameSpeed/TestSlider")?.GetComponent<Slider>();
+
+        if (testCountNum == null)
+            testCountNum = GameObject.Find("TestUI/TestCount/TestNum")?.GetComponent<TextMeshProUGUI>();
+        if (maxScoreNum == null)
+            maxScoreNum = GameObject.Find("TestUI/MaxScore/TestNum")?.GetComponent<TextMeshProUGUI>();
+        if (averageScoreNum == null)
+            averageScoreNum = GameObject.Find("TestUI/AverageScore/TestNum")?.GetComponent<TextMeshProUGUI>();
+
+        if (timeLimit.TMP == null)
+            timeLimit.TMP = GameObject.Find("TestUI/TimeLimit/TestText")?.GetComponent<TextMeshProUGUI>();
+        if (timeLimit.slider == null)
+            timeLimit.slider = GameObject.Find("TestUI/TimeLimit/TestSlider")?.GetComponent<Slider>();
+        if (angleRange.TMP == null)
+            angleRange.TMP = GameObject.Find("TestUI/AngleRange/TestText")?.GetComponent<TextMeshProUGUI>();
+        if (angleRange.slider == null)
+            angleRange.slider = GameObject.Find("TestUI/AngleRange/TestSlider")?.GetComponent<Slider>();
+        if (shotPower.TMP == null)
+            shotPower.TMP = GameObject.Find("TestUI/ShotPower/TestText")?.GetComponent<TextMeshProUGUI>();
+        if (shotPower.slider == null)
+            shotPower.slider = GameObject.Find("TestUI/ShotPower/TestSlider")?.GetComponent<Slider>();
+    }
+#endif
 
     private void Awake()
     {
@@ -28,6 +95,8 @@ public class TestManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        testUI.SetActive(false);
     }
 
     private void Start()
@@ -35,6 +104,7 @@ public class TestManager : MonoBehaviour
         SoundManager.Instance?.ToggleBGM();
 
         AutoPlay();
+        UpdateTestUI();
     }
 
     private void Update()
@@ -72,22 +142,22 @@ public class TestManager : MonoBehaviour
         for (int i = 1; i <= 10; i++)
         {
             KeyCode key = (i == 10) ? KeyCode.Alpha0 : (KeyCode)((int)KeyCode.Alpha0 + i);
-            if (Input.GetKey(key))
+            if (Input.GetKeyDown(key))
             {
                 UnitSystem unit = EntityManager.Instance?.Spawn(i);
-                unit.Shoot(Vector2.up * shotPower);
+                unit.Shoot(Vector2.up * shotPower.value);
                 break;
             }
         }
 
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W))
         {
             UnitSystem unit = HandleManager.Instance?.GetReady();
-            float angle = Random.Range(-angleRange, angleRange);
+            float angle = Random.Range(-angleRange.value, angleRange.value);
             Vector2 dir = Quaternion.Euler(0, 0, angle) * Vector2.up;
             if (unit != null)
             {
-                unit.Shoot(dir * shotPower);
+                unit.Shoot(dir * shotPower.value);
                 EntityManager.Instance?.Respawn();
             }
         }
@@ -110,15 +180,14 @@ public class TestManager : MonoBehaviour
             UIManager.Instance?.OpenResult(!UIManager.Instance.GetOnResult());
         if (Input.GetKeyDown(KeyCode.B))
             UIManager.Instance?.OpenDetail(!UIManager.Instance.GetOnDetail());
+        if (Input.GetKeyDown(KeyCode.BackQuote))
+            OnClickTest();
         #endregion
     }
 
     private void AutoPlay()
     {
         isAuto = !isAuto;
-
-        SoundManager.Instance?.ToggleSFX();
-        HandleManager.Instance?.SetTimeLimit(isAuto ? 0.01f : 10f);
     }
 
     private IEnumerator AutoReplay()
@@ -129,10 +198,103 @@ public class TestManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(autoReplay);
         if (GameManager.Instance.IsGameOver)
         {
-            testCount++;
-            maxScore = Mathf.Max(GameManager.Instance.GetScore(), maxScore);
+            int score = GameManager.Instance.GetScore();
+
+            totalScore += score;
+            maxScore = Mathf.Max(score, maxScore);
+            averageScore = totalScore / testCount++;
+
+            UpdateTestUI();
+
             GameManager.Instance?.Replay();
         }
         autoRoutine = null;
     }
+
+    #region 테스트 UI
+    private void OnEnable()
+    {
+        InitSlider(gameSpeed, ChangeGameSpeed);
+        InitSlider(timeLimit, ChangeTimeLimit);
+        InitSlider(angleRange, ChangeAngleRange);
+        InitSlider(shotPower, ChangeShotPower);
+    }
+
+    private void OnDisable()
+    {
+        gameSpeed.slider.onValueChanged.RemoveListener(ChangeGameSpeed);
+        timeLimit.slider.onValueChanged.RemoveListener(ChangeTimeLimit);
+        angleRange.slider.onValueChanged.RemoveListener(ChangeAngleRange);
+        shotPower.slider.onValueChanged.RemoveListener(ChangeShotPower);
+    }
+
+    private void InitSlider(SliderConfig _config, UnityEngine.Events.UnityAction<float> _action)
+    {
+        if (_config.slider == null) return;
+
+        _config.slider.minValue = _config.minValue;
+        _config.slider.maxValue = _config.maxValue;
+        _config.slider.wholeNumbers = true;
+
+        float v = _config.value;
+        if (v < _config.minValue) v = _config.minValue;
+        else if (v > _config.maxValue) v = _config.maxValue;
+        _config.slider.value = v;
+
+        _action.Invoke(_config.slider.value);
+        _config.slider.onValueChanged.AddListener(_action);
+    }
+
+    private int ChangeSlider(float _value, SliderConfig _config)
+    {
+        int v = Mathf.RoundToInt(_value);
+        if (v < _config.minValue) v = _config.minValue;
+        else if (v > _config.maxValue) v = _config.maxValue;
+        return v;
+    }
+
+    private void ApplySlider(ref SliderConfig _config, float _value, System.Action<int> _afterChange = null)
+    {
+        _config.value = ChangeSlider(_value, _config);
+
+        if (string.IsNullOrEmpty(_config.format))
+            _config.TMP.text = _config.value.ToString();
+        else
+            _config.TMP.text = string.Format(_config.format, _config.value);
+
+        _afterChange?.Invoke(_config.value);
+    }
+
+    private void UpdateSliderUI(SliderConfig _config)
+    {
+        if (string.IsNullOrEmpty(_config.format))
+            _config.TMP.text = _config.value.ToString();
+        else
+            _config.TMP.text = string.Format(_config.format, _config.value);
+
+        _config.slider.value = _config.value;
+    }
+    public void ChangeGameSpeed(float _value)=> ApplySlider(ref gameSpeed, _value, v => Time.timeScale = v);
+    public void ChangeTimeLimit(float _value)=> ApplySlider(ref timeLimit, _value, v => HandleManager.Instance?.SetTimeLimit(v));
+    public void ChangeAngleRange(float _value)=> ApplySlider(ref angleRange, _value);
+    public void ChangeShotPower(float _value)=> ApplySlider(ref shotPower, _value);
+
+    private void UpdateTestUI()
+    {
+        testCountNum.text = testCount.ToString();
+        maxScoreNum.text = maxScore.ToString();
+        averageScoreNum.text = averageScore.ToString();
+
+        UpdateSliderUI(gameSpeed);
+        UpdateSliderUI(timeLimit);
+        UpdateSliderUI(angleRange);
+        UpdateSliderUI(shotPower);
+    }
+
+    public void OnClickTest()
+    {
+        testUI.SetActive(!testUI.activeSelf);
+        UpdateTestUI();
+    }
+    #endregion
 }
