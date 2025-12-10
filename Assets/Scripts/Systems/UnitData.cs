@@ -11,9 +11,10 @@ public class UnitData : ScriptableObject
     public int ID;
     public string Name;
     public Sprite Image;
-    public float Scale;
-    public float Mass;
-    public int Score;
+
+    [Min(0f)] public float Scale;
+    [Min(0f)] public float Mass;
+    [Min(0)] public int Score;
 
 #if UNITY_EDITOR
     private void OnValidate()

@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { private set; get; }
 
     [Header("Speed")]
-    [SerializeField] private float speed = 1f;
+    [SerializeField][Min(0f)] private float speed = 1f;
 
     [Header("Score")]
     [SerializeField] private int score = 0;

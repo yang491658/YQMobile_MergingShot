@@ -19,8 +19,8 @@ public class EntityManager : MonoBehaviour
     [Header("Spawn")]
     [SerializeField] private Transform spawnPos;
     [SerializeField] private Collider2D spawnCol;
-    [SerializeField] private int respawnID = 1;
-    [SerializeField] private float respawnDelay = 3f;
+    [SerializeField][Min(0)] private int respawnID = 1;
+    [SerializeField][Min(0.1f)] private float respawnDelay = 3f;
     public event System.Action<Sprite> OnChangeNext;
 
     private readonly List<Collider2D> cols = new List<Collider2D>();

@@ -4,25 +4,25 @@ using UnityEngine;
 public class HoleSystem : MonoBehaviour
 {
     [Header("Gravity")]
-    [SerializeField] private float gravity = 300f;
+    [SerializeField][Min(0f)] private float gravity = 300f;
 
     [Header("Stabilize / Sleep")]
-    [SerializeField] private float sleepRadius = 0.6f;
-    [SerializeField] private float sleepSpeed = 0.05f;
-    [SerializeField] private int sleepFrame = 8;
+    [SerializeField][Min(0f)] private float sleepRadius = 0.6f;
+    [SerializeField][Min(0f)] private float sleepSpeed = 0.05f;
+    [SerializeField][Min(0)] private int sleepFrame = 8;
 
     [Header("Stabilize / Damping")]
-    [SerializeField] private float dampRadius = 1.2f;
-    [SerializeField] private float radDamping = 8f;
-    [SerializeField] private float tanDamping = 2f;
+    [SerializeField][Min(0f)] private float dampRadius = 1.2f;
+    [SerializeField][Min(0f)] private float radDamping = 8f;
+    [SerializeField][Min(0f)] private float tanDamping = 2f;
     [SerializeField][Min(0f)] private float maxForce = 30f;
 
     [Header("Stabilize / BounceKill")]
-    [SerializeField] private float bounceKillRadius = 0.55f;
-    [SerializeField] private float bounceKillSpeed = 0.06f;
+    [SerializeField][Min(0f)] private float bounceKillRadius = 0.55f;
+    [SerializeField][Min(0f)] private float bounceKillSpeed = 0.06f;
 
     [Header("Motor")]
-    [SerializeField] private float motorSpeed = 30f;
+    [SerializeField][Min(0f)] private float motorSpeed = 30f;
     [SerializeField][Range(0f, 1f)] private float motorCoef = 0.1f;
     [SerializeField][Range(180f, 3600f)] private float motorMax = 720f;
     private HingeJoint2D hinge;

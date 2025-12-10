@@ -35,19 +35,19 @@ public class HandleManager : MonoBehaviour
 
     [Header("Aim Dot")]
     [SerializeField] private GameObject dotPrefab;
-    [SerializeField] private int dotCount = 12;
-    [SerializeField] private float dotSpacing = 0.5f;
+    [SerializeField][Min(0)] private int dotCount = 12;
+    [SerializeField][Min(0f)] private float dotSpacing = 0.5f;
     private readonly List<Transform> dots = new List<Transform>();
 
     [Header("Aim Line & Ring")]
     [SerializeField] private LineRenderer line;
     [SerializeField] private LineRenderer ring;
-    [SerializeField] private int ringSegments = 64;
-    [SerializeField] private float ringRadius = 0.5f;
+    [SerializeField][Min(0)] private int ringSegments = 64;
+    [SerializeField][Min(0f)] private float ringRadius = 0.5f;
     private Vector3[] ringUnit;
 
     [Header("Launch")]
-    [SerializeField] private float powerCoef = 3f;
+    [SerializeField][Min(0f)] private float powerCoef = 3f;
     private float launchTimer = 0f;
     [SerializeField][Min(0.01f)] private float timeLimit = 10f;
     [SerializeField][Range(0f, 90f)] private float angleLimit = 45f;
@@ -55,9 +55,9 @@ public class HandleManager : MonoBehaviour
 
 #if UNITY_EDITOR
     [Header("Mark")]
-    [SerializeField] private float markDuration = 1f;
-    [SerializeField] private float markRadius = 0.5f;
-    [SerializeField] private int markSegment = 24;
+    private float markDuration = 1f;
+    private float markRadius = 0.5f;
+    private int markSegment = 24;
     private readonly List<Vector3> marks = new();
     private readonly List<float> markTimes = new();
     private readonly List<Color> markColors = new();

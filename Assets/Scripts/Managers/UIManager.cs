@@ -39,9 +39,9 @@ public class UIManager : MonoBehaviour
     [Header("Count UI")]
     [SerializeField] private TextMeshProUGUI countText;
     private Coroutine countRoutine;
-    [SerializeField] private int countStart = 3;
-    [SerializeField] private float countDuration = 1f;
-    [SerializeField] private float countScale = 10f;
+    [SerializeField][Min(0)] private int countStart = 3;
+    [SerializeField][Min(0f)] private float countDuration = 1f;
+    [SerializeField][Min(0f)] private float countScale = 10f;
     [SerializeField] private bool countSkip = true;
 
     [Header("InGame UI")]
@@ -57,8 +57,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Image timerImage;
     [SerializeField] private TextMeshProUGUI timerTitle;
     [Space]
-    [SerializeField] private float shakeSpeed = 50f;
-    [SerializeField] private float shakeAmount = 8f;
+    [SerializeField][Min(0f)] private float shakeSpeed = 50f;
+    [SerializeField][Min(0f)] private float shakeAmount = 8f;
     [SerializeField] private Vector2 textSize = new Vector2(0f, 120f);
     private Vector2 timerPos0;
     private int lastCountSfx = -1;
