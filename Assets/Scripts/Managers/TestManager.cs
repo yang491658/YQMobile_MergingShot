@@ -109,36 +109,24 @@ public class TestManager : MonoBehaviour
 
     private void Update()
     {
-        #region 게임 테스트
-        if (Input.GetKeyDown(KeyCode.P))
-            GameManager.Instance?.Pause(!GameManager.Instance.IsPaused);
-        if (Input.GetKeyDown(KeyCode.G))
-            GameManager.Instance?.GameOver();
-        if (Input.GetKeyDown(KeyCode.R))
-            GameManager.Instance?.Replay();
-        if (Input.GetKeyDown(KeyCode.Q))
-            GameManager.Instance?.Quit();
-
-        if (Input.GetKeyDown(KeyCode.O))
-            AutoPlay();
-        if (isAuto)
-            if (GameManager.Instance.IsGameOver && autoRoutine == null)
-                autoRoutine = StartCoroutine(AutoReplay());
+        #region 게임 매니저
+        if (Input.GetKeyDown(KeyCode.P)) GameManager.Instance?.Pause(!GameManager.Instance.IsPaused);
+        if (Input.GetKeyDown(KeyCode.G)) GameManager.Instance?.GameOver();
+        if (Input.GetKeyDown(KeyCode.R)) GameManager.Instance?.Replay();
+        if (Input.GetKeyDown(KeyCode.Q)) GameManager.Instance?.Quit();
         #endregion
 
-        #region 사운드 테스트
+        #region 사운드 매니저
         if (Input.GetKeyDown(KeyCode.B))
         {
             bgmPause = !bgmPause;
             SoundManager.Instance?.PauseSound(bgmPause);
         }
-        if (Input.GetKeyDown(KeyCode.M))
-            SoundManager.Instance?.ToggleBGM();
-        if (Input.GetKeyDown(KeyCode.N))
-            SoundManager.Instance?.ToggleSFX();
+        if (Input.GetKeyDown(KeyCode.M)) SoundManager.Instance?.ToggleBGM();
+        if (Input.GetKeyDown(KeyCode.N)) SoundManager.Instance?.ToggleSFX();
         #endregion
 
-        #region 엔티티 테스트
+        #region 엔티티 매니저
         for (int i = 1; i <= 10; i++)
         {
             KeyCode key = (i == 10) ? KeyCode.Alpha0 : (KeyCode)((int)KeyCode.Alpha0 + i);
@@ -149,7 +137,6 @@ public class TestManager : MonoBehaviour
                 break;
             }
         }
-
         if (Input.GetKeyDown(KeyCode.W))
         {
             UnitSystem unit = HandleManager.Instance?.GetReady();
@@ -161,30 +148,33 @@ public class TestManager : MonoBehaviour
                 EntityManager.Instance?.Respawn();
             }
         }
-
-        if (Input.GetKeyDown(KeyCode.S))
-            EntityManager.Instance?.Spawn();
-
-        if (Input.GetKeyDown(KeyCode.Delete))
-            EntityManager.Instance?.DespawnAll();
+        if (Input.GetKeyDown(KeyCode.S)) EntityManager.Instance?.Spawn();
+        if (Input.GetKeyDown(KeyCode.Delete)) EntityManager.Instance?.DespawnAll();
         #endregion
 
-        #region UI 테스트
-        if (Input.GetKeyDown(KeyCode.Z))
-            UIManager.Instance?.OpenSetting(!UIManager.Instance.GetOnSetting());
-        if (Input.GetKeyDown(KeyCode.X))
-            UIManager.Instance?.OpenConfirm(!UIManager.Instance.GetOnConfirm());
-        if (Input.GetKeyDown(KeyCode.C))
-            UIManager.Instance?.OpenHelp(!UIManager.Instance.GetOnHelp());
-        if (Input.GetKeyDown(KeyCode.V))
-            UIManager.Instance?.OpenResult(!UIManager.Instance.GetOnResult());
-        if (Input.GetKeyDown(KeyCode.B))
-            UIManager.Instance?.OpenDetail(!UIManager.Instance.GetOnDetail());
-        if (Input.GetKeyDown(KeyCode.BackQuote))
-            OnClickTest();
+        #region UI 매니저
+        if (Input.GetKeyDown(KeyCode.Z)) UIManager.Instance?.OpenSetting(!UIManager.Instance.GetOnSetting());
+        if (Input.GetKeyDown(KeyCode.X)) UIManager.Instance?.OpenConfirm(!UIManager.Instance.GetOnConfirm());
+        if (Input.GetKeyDown(KeyCode.C)) UIManager.Instance?.OpenHelp(!UIManager.Instance.GetOnHelp());
+        if (Input.GetKeyDown(KeyCode.V)) UIManager.Instance?.OpenResult(!UIManager.Instance.GetOnResult());
+        if (Input.GetKeyDown(KeyCode.B)) UIManager.Instance?.OpenDetail(!UIManager.Instance.GetOnDetail());
+        #endregion
+
+        #region 테스트 매니저
+        if (Input.GetKeyDown(KeyCode.O)) AutoPlay();
+        if (isAuto)
+            if (GameManager.Instance.IsGameOver)
+            {
+                if (autoRoutine == null)
+                    autoRoutine = StartCoroutine(AutoReplay());
+            }
+        if (Input.GetKeyDown(KeyCode.BackQuote)) OnClickTest();
+        if (Input.GetKeyDown(KeyCode.UpArrow)) ChangeGameSpeed(++gameSpeed.value);
+        if (Input.GetKeyDown(KeyCode.DownArrow)) ChangeGameSpeed(--gameSpeed.value);
         #endregion
     }
 
+    #region 테스트
     private void AutoPlay()
     {
         isAuto = !isAuto;
@@ -210,6 +200,7 @@ public class TestManager : MonoBehaviour
         }
         autoRoutine = null;
     }
+    #endregion
 
     #region 테스트 UI
     private void OnEnable()
